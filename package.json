@@ -1,0 +1,29 @@
+{
+  "name": "trade-journal",
+  "version": "1.0.0",
+  "description": "fx trader's jounal",
+  "main": "app.js",
+  "bin": {
+    "trade-journal": "bin/server.js"
+  },
+  "scripts": {
+    "start": "nodemon ./bin/server"
+  },
+  "keywords": [
+    "trade",
+    "fx",
+    "forex",
+    "stocks",
+    "indices"
+  ],
+  "author": "ikenna emmanuel",
+  "license": "ISC",
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "debug": "^4.3.4",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "http": "^0.0.1-security",
+    "mongoose": "^7.0.3"
+  }
+}
