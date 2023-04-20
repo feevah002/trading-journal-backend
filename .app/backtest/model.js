@@ -1,16 +1,17 @@
-const mongoose =  require('mongoose')
+const mongoose = require("mongoose");
 
 const BTtradesSchema = new mongoose.Schema(
   {
     // _createdBy:{
     //   type:mongoose.Schema.Types.ObjectId,
+    //  required:true,
     // },
     session: {
       type: String,
       enum: ["Asian", "New York", "London"],
       required: true,
     },
-    tradeImage: {
+    media: {
       type: String,
     },
     setup: {
@@ -63,6 +64,5 @@ const BTtradesSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-
 
 module.exports = mongoose.model("BTtrades", BTtradesSchema);

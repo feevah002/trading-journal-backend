@@ -1,14 +1,12 @@
-exports.validateCreatedData = async (data) => {
+exports.validateCreatedData = async (data, media) => {
   let validated = {};
-  if (data.session) {
-    validated.session = data.session;
+  if (media) {
+    validated.media = media;
   }
   if (data.session) {
     validated.session = data.session;
   }
-  if (data.tradeImage) {
-    validated.tradeImage = data.tradeImage;
-  }
+ 
   if (data.setup) {
     validated.setup = data.setup;
   }
@@ -55,16 +53,14 @@ exports.validateCreatedData = async (data) => {
   return validated;
 };
 
-exports.validateEditedData = async (data) => {
+exports.validateEditedData = async (data, media) => {
   let validated = {};
   if (data.session) {
     validated.session = data.session;
   }
-  if (data.session) {
-    validated.session = data.session;
-  }
-  if (data.tradeImage) {
-    validated.tradeImage = data.tradeImage;
+
+  if (media) {
+    validated.media = media;
   }
   if (data.setup) {
     validated.setup = data.setup;

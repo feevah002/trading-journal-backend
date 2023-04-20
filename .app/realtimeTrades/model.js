@@ -14,7 +14,7 @@ const RTtradesSchema = new mongoose.Schema(
       type: String,
       enum: ["demo", "real"],
     },
-    tradeImage: {
+    media: {
       type: String,
     },
     setup: {

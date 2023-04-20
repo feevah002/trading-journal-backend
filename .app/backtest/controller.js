@@ -37,7 +37,7 @@ exports.getAllTrades = async (req, res, next) => {
  */
 exports.create = async (req,res,next)=>{
   try{
-    const validatedData = await validateCreatedData(req.body);
+    const validatedData = await validateCreatedData(req.body, req.file.path);
     const data = await BTrepository.BTaddTrade(validatedData);
     res.status(200).json({
       status: true,
@@ -106,7 +106,7 @@ exports.getBySetup = async (req, res, next) => {
  */
 exports.updateTrade = async (req,res,next)=>{
   try{
-    const validatedData = await validateEditedData(req.body);
+    const validatedData = await validateEditedData(req.body, req.file.path);
     const tradeID = req.params.tid
     const data = await BTrepository.BTUpdateTrade(
       {
