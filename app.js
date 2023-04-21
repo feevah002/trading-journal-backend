@@ -16,10 +16,12 @@ const RTtrades = require("./.app/realtimeTrades/route");
 const BTtrades = require("./.app/backtest/route");
 const tradingStrategy = require("./.app/trading-strategy/route");
 const tradeplan = require("./.app/trading-plan/route");
+const userRoute = require("./.app/user/route");
 
 app.use("/trades/real-time", RTtrades);
 app.use("/trades/back-time", BTtrades);
 app.use("/trades/strategy", tradingStrategy);
 app.use("/trades/trade-plan", tradeplan);
+app.use("/", userRoute);
 
 module.exports = app;

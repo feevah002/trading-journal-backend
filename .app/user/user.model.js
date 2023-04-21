@@ -2,28 +2,39 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const bcryptSalt = process.env.BCRYPT_SALT;
 const crypto = require("crypto");
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+
 const UserSchema = new mongoose.Schema(
   {
     email: {
       type: String,
       trim: true,
-      unique: true,
-      required: true,
+      // unique: true,
+      //required: true,
     },
     username: {
       type: String,
       trim: true,
-      required: true,
-      unique: true,
+      //required: true,
+      // unique: true,
     },
     firstname: {
       type: String,
       trim: true,
-      required: true,
-      unique: true,
+      //required: true,
+      // unique: true,
+    },
+    lastname: {
+      type: String,
+      trim: true,
+      //required: true,
+      // unique: true,
+    },
+    middlename: {
+      type: String,
+      trim: true,
+      //required: true,
+      // unique: true,
     },
     verified: {
       type: Boolean,
@@ -50,7 +61,6 @@ const UserSchema = new mongoose.Schema(
     tokenExpire: Date,
     lastlogin: Date,
   },
-
   {
     timestamps: true,
   }
@@ -68,14 +78,15 @@ UserSchema.pre("save", async function (next) {
 // Generate and hash password token
 UserSchema.methods.getResetPasswordToken = function () {
   // Generate token
-  const resetToken = crypto.randomBytes(20).toString('hex');
+  const resetToken = crypto.randomBytes(20).toString("hex");
 
   // Hash token and set to resetPasswordToken field
   this.resetPasswordToken = crypto
-    .createHash('sha256')
+    .createHash("sha256")
     .update(resetToken)
-    .digest('hex');
+    .digest("hex");
 
+    
   // Set expire
   this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
 
@@ -83,13 +94,13 @@ UserSchema.methods.getResetPasswordToken = function () {
 };
 
 // Generate and hash token For Any Verification
-UserSchema.methods.getGenerateToken = function () {
+UserSchema.methods.getGenerateToken = async function () {
   // Generate token
-  const genToken = crypto.randomBytes(20).toString('hex');
-
+  const genToken = crypto.randomBytes(20).toString("hex");
+  
   // Hash token and set to token field
-  this.token = crypto.createHash('sha256').update(genToken).digest('hex');
-
+  this.token = await bcrypt.hash(genToken, Number(bcryptSalt));
+  
   // Set expiring
   this.tokenExpire = Date.now() + 10 * 60 * 1000;
 
@@ -100,7 +111,7 @@ UserSchema.methods.getGenerateToken = function () {
 UserSchema.methods.getSignedJwtToken = function () {
   return jwt.sign(
     {
-      user_id: this._id
+      user_id: this._id,
     },
     process.env.JWT_SECRET
   );

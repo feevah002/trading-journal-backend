@@ -1,6 +1,6 @@
 const JWT = require("jsonwebtoken");
 const User = require("./user.model");
-const sendEmail = require("../utils/email/sendEmail");
+const sendEmail = require("../../utils/email/sendEmail");
 const crypto = require("crypto");
 const bcrypt = require("bcrypt");
 
@@ -8,42 +8,21 @@ const JWTSecret = process.env.JWT_SECRET;
 const bcryptSalt = process.env.BCRYPT_SALT;
 const clientURL = process.env.CLIENT_URL;
 
-exports.signup = async (data) => {
-  let user = await User.findOne({ email: data.email });
-  if (user) {
-    throw new Error("Email already exist", 422);
-  } 
-  user = new User(data);
-  const token = user.getSignedJwtToken();
-  await user.save();
-  sendEmail(
-    user.email,
-    "sign up successful",
-    {
-      firstname: user.firstname,
-    },
-    "../../utils/email/templates/requestResetPassword.handlebars"
-  );
-  return (data = {
-    userId: user._id,
-    email: user.email,
-    firstname: user.firstname,
-    token: token,
-  });
-  
- 
+exports.signup = async (data, options) => {
+  const user = await User.create(data, options);
+  return user;
 };
 
-exports.getUser = async (id) => {
-  const user = User.findOne({ email });
+exports.getUser = async (query) => {
+  const user = await User.findOne(query);
   return user;
 };
 
 exports.requestPasswordReset = async (email) => {
   const user = await User.findOne({ email });
   if (!user) {
-    if (!user) throw new Error("Email does not exist");
-  } 
+    throw new Error("Email does not exist");
+  }
   let resetToken = user.getResetPasswordToken();
 
   const link = `${clientURL}/resetPassword?token=${resetToken}&id=${user._id}`;
@@ -58,7 +37,6 @@ exports.requestPasswordReset = async (email) => {
     "../../utils/email/templates/requestResetPassword.handlebars"
   );
   return link;
-
 };
 
 exports.resetPassword = async (userId, token, password) => {
@@ -82,7 +60,7 @@ exports.resetPassword = async (userId, token, password) => {
   );
 
   // deleting token
-  userInfo.token = ''
+  userInfo.token = "";
   sendEmail(
     userInfo.email,
     "Password Reset Successfully",
@@ -92,6 +70,5 @@ exports.resetPassword = async (userId, token, password) => {
     "../../utils/email/templates/resetPassword.handlebars"
   );
 
-  
-   return true;
+  return true;
 };

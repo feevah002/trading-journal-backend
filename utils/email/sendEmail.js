@@ -20,17 +20,17 @@ const sendEmail = async (email, subject, payload, template) => {
     const compiledTemplate = handlebars.compile(source);
     const options = () => {
       return {
-        from: process.env.FROM_EMAIL,
+        from: process.env.EMAIL_USERNAME,
         to: email,
         subject: subject,
         html: compiledTemplate(payload),
       };
     };
-
+    
     // Send email
     transporter.sendMail(options(), (error, info) => {
       if (error) {
-         logEmailFail(JSON.stringify(error));
+        logEmailFail(JSON.stringify(error));
       } else {
         logEmailSent(JSON.stringify(info));
         return res.status(200).json({
