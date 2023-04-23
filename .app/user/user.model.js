@@ -12,6 +12,9 @@ const UserSchema = new mongoose.Schema(
       // unique: true,
       //required: true,
     },
+    avatar: {
+      type: String,
+    },
     username: {
       type: String,
       trim: true,
@@ -57,6 +60,8 @@ const UserSchema = new mongoose.Schema(
     password: { type: String },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
+    delAccountToken: String,
+    deleteAccountExpire: Date,
     token: String,
     tokenExpire: Date,
     lastlogin: Date,
@@ -76,21 +81,32 @@ UserSchema.pre("save", async function (next) {
 });
 
 // Generate and hash password token
-UserSchema.methods.getResetPasswordToken = function () {
+UserSchema.methods.getResetPasswordToken = async function () {
   // Generate token
   const resetToken = crypto.randomBytes(20).toString("hex");
 
   // Hash token and set to resetPasswordToken field
-  this.resetPasswordToken = crypto
-    .createHash("sha256")
-    .update(resetToken)
-    .digest("hex");
+  this.resetPasswordToken = await bcrypt.hash(resetToken, Number(bcryptSalt));
 
     
   // Set expire
   this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
 
   return resetToken;
+};
+// Generate and hash delte account token
+UserSchema.methods.getDeleteAccountToken = async function () {
+  // Generate token
+  const deleteToken = crypto.randomBytes(20).toString("hex");
+
+  // Hash token and set to resetPasswordToken field
+  this.delAccountToken = await bcrypt.hash(deleteToken, Number(bcryptSalt));
+
+    
+  // Set expire
+  this.deleteccountExpire = Date.now() + 10 * 60 * 1000;
+
+  return deleteToken;
 };
 
 // Generate and hash token For Any Verification

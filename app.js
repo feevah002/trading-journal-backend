@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
-const mongoose = require("mongoose");
 const path = require("path");
+const cookieParser = require("cookie-parser");
 const { connectDB } = require("./database/database");
 require("dotenv").config({ path: "./.env/config.env" });
 
@@ -11,6 +11,8 @@ connectDB();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
+app.use(cookieParser());
+
 // routes
 const RTtrades = require("./.app/realtimeTrades/route");
 const BTtrades = require("./.app/backtest/route");

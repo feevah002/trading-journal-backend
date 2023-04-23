@@ -9,27 +9,35 @@ const mongoose = require("mongoose");
 const { matchPassword } = require("../../utils/matchPassword");
 const {
   getUser,
-  signup,
+  createNewUser,
   requestPasswordReset,
   resetPassword,
+  requestDeleteAccount,
+  deleteAccount,
+  verifyUser,
+  updateUserDetails,
+  createCloudUrl,
 } = require("./repository");
 
+// -----------create and verify new account------------------
 exports.signUpController = async (req, res, next) => {
   let validate = new validateInput();
-  const data = validate.atSignUp(req.body);
-
+  let validatedData = validate.atSignUp(req.body, req.file);
+  // if avatar exist
+  if (validatedData.avatar) {
+    const avatarUrl = await createCloudUrl(validatedData.avatar);
+    validatedData.avatar = avatarUrl;
+  }
   // delete later
   const User = require("./user.model");
-  await User.findOneAndDelete({ email: data.email });
+  await User.findOneAndDelete({ email: validatedData.email });
 
-  let user = await getUser({ email: data.email });
+  let user = await getUser({ email: validatedData.email });
   if (!_.isEmpty(user)) {
-    return next(
-      new ErrorResponse(
-        `${data.email} is Assigned to a user sign in instead`,
-        401
-      )
-    );
+    return res.status(401).json({
+      status: false,
+      error: `${validatedData.email} is Assigned to a user sign in instead`,
+    });
   }
   // Start a Session
   const session = await mongoose.startSession();
@@ -37,15 +45,21 @@ exports.signUpController = async (req, res, next) => {
   const opts = { session, new: true };
 
   // check if email
-  if (!data.email) {
-    return next(new ErrorResponse("Email Address Is Required", 403));
+  if (!validatedData.email) {
+    return res.status(403).json({
+      status: false,
+      error: "Email Address Is Required",
+    });
   }
-  if (!data.password) {
-    return next(new ErrorResponse("Password Is Required", 403));
+  if (!validatedData.password) {
+    return res.status(403).json({
+      status: false,
+      error: "Password Is Required",
+    });
   }
   try {
-    const payload = data;
-    user = await signup([payload], opts);
+    const payload = validatedData;
+    user = await createNewUser([payload], opts);
 
     const token = await user[0].getGenerateToken();
     await user[0].save();
@@ -64,9 +78,101 @@ exports.signUpController = async (req, res, next) => {
     signToken(user, 200, res);
   } catch (error) {
     session.endSession();
-    next(error);
+    return res.status(500).json({
+      status: false,
+      error: error,
+    });
   }
 };
+/**
+ * @author Ikenna Emmanuel <eikenna58@gmail.com>
+ * @description send verification token
+ * @route `/auth/verify/:uid/:token`
+ * @access Private
+ * @type POST
+ */
+exports.verifyController = async (req, res, next) => {
+  try {
+    const token = req.params.token;
+    const userId = req.params.uid;
+    const repoResponse = await verifyUser({ _id: userId }, token);
+    return res.json(repoResponse);
+  } catch (error) {
+    res.status(400).json({
+      status: false,
+      error: error,
+    });
+  }
+};
+
+// get/edit user profile
+/**
+ * @author Ikenna Emmanuel <eikenna58@gmail.com>
+ * @description get user profile
+ * @route `/auth/user/:username`
+ * @access Private
+ * @type GET
+ */
+exports.getUserProfileController = async (req, res, next) => {
+  try {
+    const username = req.params.username;
+    const data = await getUser({ username });
+    if (!data) {
+      return res.status(400).json({
+        status: false,
+        message: "User not found",
+      });
+    }
+    return res.status(200).json({
+      status: true,
+      data,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: false,
+      error: error,
+    });
+  }
+};
+/**
+ * @author Ikenna Emmanuel <eikenna58@gmail.com>
+ * @description get user profile
+ * @route `/auth/user/:username`
+ * @access Private
+ * @type POST
+ */
+exports.updateUserProfileController = async (req, res, next) => {
+  try {
+    // validating data
+    let validate = new validateInput();
+    let validatedData = validate.atEdit(req.body, req.file);
+    // if avatar exist
+    if (validatedData.avatar) {
+      const avatarUrl = await createCloudUrl(validatedData.avatar);
+      validatedData.avatar = avatarUrl;
+    }
+    const username = req.params.username;
+    const exist = await getUser({ username });
+    if (!exist) {
+      return res.status(400).json({
+        status: false,
+        message: "User not found",
+      });
+    }
+    const updData = await updateUserDetails({ username }, validatedData);
+    return res.status(200).json({
+      status: true,
+      data: updData,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: false,
+      error: error,
+    });
+  }
+};
+
+// -------------------login/logout------------------------------
 /**
  * @author Ikenna Emmanuel <eikenna58@gmail.com>
  * @description login authentication
@@ -79,107 +185,37 @@ exports.loginController = async (req, res, next) => {
     let validate = new validateInput();
     const { email, password } = validate.atLogin(req.body);
     if (!email || !password) {
-      return next(
-        new ErrorResponse("Please provide an email and password", 400)
-      );
+      return res.status(400).json({
+        status: false,
+        error: "Please provide an email and password",
+      });
     }
     const data = await getUser({ email: email });
 
     if (_.isEmpty(data)) {
-      return next(new ErrorResponse("Invalid credentials", 401));
+      return res.status(401).json({
+        status: false,
+        error: "Invalid credentials",
+      });
     }
     const isMatch = await matchPassword(password, data.password);
-
     if (!isMatch) {
-      return next(new ErrorResponse("Invalid credentials", 401));
+      return res.status(401).json({
+        status: false,
+        error: "Invalid credentials",
+      });
     } else {
       const user = await getUser({ email: data.email });
       signToken(user, 200, res);
     }
   } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * @author Ikenna Emmanuel <eikenna58@gmail.com>
- * @description send verification token
- * @route `/auth/verify/:uid/:token`
- * @access Private
- * @type POST
- */
-exports.verifyController = async (req, res, next) => {
-  try {
-    const token = req.params.token;
-    const userId = req.params.uid;
-    const user = await getUser({ _id: userId });
-
-    if (user.verified) {
-      return res
-        .status(401)
-        .json({
-          message: "user is already verified",
-        })
-        .end();
-    }
-    const isMatch = await bcrypt.compare(token, user.token);
-    if (!isMatch) {
-      return next(new ErrorResponse("Invalid or Expired Token", 401));
-    } else {
-      user.verified = true;
-      user.token = "";
-      user.tokenExpire = "";
-      await user.save();
-      await sendEmail(
-        user.email,
-        "Verification Successful",
-        { firstname: user.firstname },
-        "../../utils/email/templates/verificationSuccess.handlebars"
-      );
-    }
-    return res.status(200).json({
-      status: "true",
-      message: "verification successful",
-    });
-  } catch (error) {
-    res.status(400).json({
+    return res.status(400).json({
       status: false,
       error: error,
     });
   }
 };
 
-/**
- * @author Ikenna Emmanuel <eikenna58@gmail.com>
- * @description requsest reset password
- * @route `/auth/requestResetPassword`
- * @access Private
- * @type POST
- */
-
-exports.resetPasswordRequestController = async (req, res, next) => {
-  const requestPasswordResetService = await requestPasswordReset(
-    req.body.email
-  );
-  return res.json(requestPasswordResetService);
-};
-
-/**
- * @author Ikenna Emmanuel <eikenna58@gmail.com>
- * @description change password
- * @route `/auth/resetPassword/:token/:userId`
- * @access Private
- * @type POST
- */
-
-exports.resetPasswordController = async (req, res, next) => {
-  const resetPasswordService = await resetPassword(
-    req.params.userId,
-    req.params.token,
-    req.body.password
-  );
-  return res.json(resetPasswordService);
-};
 /**
  * @author Ikenna Emmanuel <eikenna58@gmail.com>
  * @description Logout
@@ -202,3 +238,101 @@ exports.logoutController = async (req, res, next) => {
     });
   }
 };
+// ------------------request/reset password--------------------
+/**
+ * @author Ikenna Emmanuel <eikenna58@gmail.com>
+ * @description requsest reset password
+ * @route `/auth/requestResetPassword`
+ * @access Private
+ * @type POST
+ */
+
+exports.resetPasswordRequestController = async (req, res, next) => {
+  try {
+    const requestPasswordResetService = await requestPasswordReset(
+      req.body.email,
+    );
+
+    return res.json(requestPasswordResetService);
+  } catch (error) {
+    return res.status(400).json({
+      status: false,
+      error,
+    });
+  }
+};
+
+/**
+ * @author Ikenna Emmanuel <eikenna58@gmail.com>
+ * @description reset password
+ * @route `/auth/resetPassword/:resetPasswordToken/:userId`
+ * @access Private
+ * @type POST
+ */
+
+exports.resetPasswordController = async (req, res, next) => {
+  try {
+    const resetPasswordService = await resetPassword(
+      req.params.userId,
+      req.params.resetPasswordToken,
+      req.body.password
+    );
+    return res.json(resetPasswordService);
+  } catch (error) {
+    return res.status(400).json({
+      status: false,
+      error,
+    });
+  }
+};
+
+// ---------------------delete account --------------------
+/**
+ * @author Ikenna Emmanuel <eikenna58@gmail.com>
+ * @description requsest reset password
+ * @route `/auth/requestDeleteAccount/`
+ * @access Private
+ * @type POST
+ */
+
+exports.deleteAccountRequestController = async (req, res, next) => {
+  try {
+    const requestPasswordResetService = await requestDeleteAccount(
+      req.user.id,
+      req.body.password,
+    );
+
+    return res.json(requestPasswordResetService);
+  } catch (error) {
+    return res.status(400).json({
+      status: false,
+      error,
+    });
+  }
+};
+
+/**
+ * @author Ikenna Emmanuel <eikenna58@gmail.com>
+ * @description change password
+ * @route `/auth/deleteAccount/:deleteAccountToken/:userId`
+ * @access Private
+ * @type POST
+ */
+
+exports.deleteAccountController = async (req, res, next) => {
+  try {
+    const deleteAccountResponse = await deleteAccount(
+      req.params.userId,
+      req.params.deleteAccountToken,
+      req.body.password
+    );
+    return res.json(deleteAccountResponse);
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({
+      status: false,
+      error,
+    });
+  }
+};
+// ---------------------------
