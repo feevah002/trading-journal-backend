@@ -7,7 +7,8 @@
     "trade-journal": "bin/server.js"
   },
   "scripts": {
-    "start": "nodemon ./bin/server"
+    "dev": "nodemon ./server/server",
+    "start": "node ./server/server"
   },
   "keywords": [
     "trade",

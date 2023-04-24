@@ -64,10 +64,6 @@ class ValidateInput {
     if (data.username) {
       validated.username = data.username;
     }
-    // password
-    if (data.password) {
-      validated.password = data.password;
-    }
     return validated;
   }
   atLogin(data) {

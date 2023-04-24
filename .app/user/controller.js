@@ -286,10 +286,9 @@ exports.resetPasswordController = async (req, res, next) => {
   }
 };
 
-// ---------------------delete account --------------------
 /**
  * @author Ikenna Emmanuel <eikenna58@gmail.com>
- * @description requsest reset password
+ * @description requsest delete account
  * @route `/auth/requestDeleteAccount/`
  * @access Private
  * @type POST
@@ -313,7 +312,7 @@ exports.deleteAccountRequestController = async (req, res, next) => {
 
 /**
  * @author Ikenna Emmanuel <eikenna58@gmail.com>
- * @description change password
+ * @description delete account
  * @route `/auth/deleteAccount/:deleteAccountToken/:userId`
  * @access Private
  * @type POST
@@ -328,7 +327,6 @@ exports.deleteAccountController = async (req, res, next) => {
     );
     return res.json(deleteAccountResponse);
   } catch (error) {
-    console.log(error)
     return res.status(400).json({
       status: false,
       error,

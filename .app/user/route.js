@@ -23,6 +23,17 @@ router.post("/auth/verify/:uid/:token", verifyController);
 router.post("/auth/login", loginController);
 router.post("/auth/logout", logoutController);
 
+//get user profile
+router.get("/auth/user-profile/:username", protect, getUserProfileController);
+
+// update user profile
+router.post(
+  "/auth/user-profile/:username/",
+  protect,
+  upload.single("avatar"),
+  updateUserProfileController
+);
+
 // reset password
 router.post("/auth/requestResetPassword", resetPasswordRequestController);
 router.post(
@@ -30,25 +41,16 @@ router.post(
   resetPasswordController
 );
 
-// delete account 
+// request delete account
+router.post(
+  "/auth/requestDeleteAccount",
+  protect,
+  deleteAccountRequestController
+);
+// delete account
 router.post(
   "/auth/deleteAccount/:deleteAccountToken/:userId",
   deleteAccountController
 );
-
-// routes to be protected
-router.use(protect)
-
-//get/edit user profile
-router.get("/auth/user-profile/:username", getUserProfileController);
-router.post(
-  "/auth/user-profile/:username/",
-  upload.single("avatar"),
-  updateUserProfileController
-);
-
-// request delete account 
-router.post("/auth/requestDeleteAccount", deleteAccountRequestController);
-
 
 module.exports = router;
