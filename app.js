@@ -4,7 +4,12 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const { connectDB } = require("./database/database");
 require("dotenv").config({ path: "./.env/config.env" });
-
+const cors = require("cors");
+app.use(
+  cors({
+    origin: "http://127.0.0.1:5500",
+  })
+);
 // DB conector
 connectDB();
 
