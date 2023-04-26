@@ -4,6 +4,8 @@ const RTtradesSchema = new mongoose.Schema(
   {
     _createdBy: {
       type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
     session: {
       type: String,

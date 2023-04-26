@@ -1,13 +1,13 @@
 const TradeStrategy = require("./model");
 
 // get all trade strategies
-exports.getTstrategies = async (id) => {
-  const data = TradeStrategy.find({});
+exports.getTstrategies = async (query) => {
+  const data = TradeStrategy.find(query);
   return data;
 };
 // get info about a trade strategy
-exports.getTstrategy = async (id) => {
-  const data = TradeStrategy.findById(id);
+exports.getTstrategy = async (query) => {
+  const data = TradeStrategy.findById(query);
   return data;
 };
 
@@ -17,15 +17,17 @@ exports.addTstrategy = async (payload) => {
   return data;
 };
 
-
 // edit a strategy
-exports.updTstrategy = async (id, payload) => {
-  const data = await TradeStrategy.findOneAndUpdate(id, payload);
+exports.updTstrategy = async (query, payload) => {
+  const data = await TradeStrategy.findOneAndUpdate(
+    query,
+    payload
+  );
   return data;
 };
 
 // delete a strategy
-exports.delTstrategy = async (id) => {
-  const data = await TradeStrategy.findByIdAndRemove(id);
+exports.delTstrategy = async (query) => {
+  const data = await TradeStrategy.findByIdAndRemove(query);
   return data;
 };

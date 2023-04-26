@@ -4,10 +4,16 @@ const TradePlanSchema = new mongoose.Schema(
   {
     _createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      // required:true,
+      ref: "User",
+      required: true,
     },
     plan: {
       type: String,
+      required: true,
+    },
+    strategy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
   },

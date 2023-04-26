@@ -1,8 +1,7 @@
 const RTrepository = require("./repository");
-const {
-  validateCreatedData, validateEditedData,
-} = require("../middleware/validate");
-
+const validateInput = require("../../utils/validateInput");
+let { validateCreatedData, validateEditedData } = new validateInput();
+const { getUser } = require("../user/repository");
 /**
  * @author Ikenna Emmanuel <eikenna58@gmail.com>
  * @description get all real time trade data
@@ -12,7 +11,7 @@ const {
  */
 exports.getAllTrades = async (req, res, next) => {
   try {
-    const data = await RTrepository.RTtrades();
+    const data = await RTrepository.RTtrades({ _createdBy: req.user.id });
     res.status(200).json({
       status: true,
       data: data,
@@ -28,13 +27,19 @@ exports.getAllTrades = async (req, res, next) => {
  * @author Ikenna Emmanuel <eikenna58@gmail.com>
  * @description create a new trade data
  * @route `/trades/real-time/new`
- * @access Public
+ * @access Private
  * @type Post
  */
 exports.create = async (req, res, next) => {
   try {
-    const validatedData = await validateCreatedData(req.body, req.file.path);
+    const validatedData = await validateCreatedData(req.body, req.file, req.user.id);
+
     const data = await RTrepository.RTaddTrade(validatedData);
+    
+     const user = await getUser({ _id: req.user.id });
+     user.trades.realtime.push(data.id);
+     await user.save();
+   
     res.status(200).json({
       status: true,
       data: data,
@@ -57,7 +62,7 @@ exports.create = async (req, res, next) => {
 exports.getBySession = async (req, res, next) => {
   try {
     const session = req.params.session;
-    const data = await RTrepository.RTshowBySession(session);
+    const data = await RTrepository.RTshowBySession(session, req.user.id);
     res.status(200).json({
       status: true,
       data: data,
@@ -80,7 +85,7 @@ exports.getBySession = async (req, res, next) => {
 exports.getBySetup = async (req, res, next) => {
   try {
     const setup = req.params.setup;
-    const data = await RTrepository.RTshowBySetup(setup);
+    const data = await RTrepository.RTshowBySetup(setup, req.user.id);
     res.status(200).json({
       status: true,
       data: data,
@@ -102,13 +107,14 @@ exports.getBySetup = async (req, res, next) => {
  */
 exports.updateTrade = async (req, res, next) => {
   try {
-    const validatedData = await validateEditedData(req.body, req.file.path);
+    const validatedData = await validateEditedData(req.body, req.file);
     const tradeID = req.params.tid;
     const data = await RTrepository.RTUpdateTrade(
       {
         _id: tradeID,
+        _createdBy:req.user.id
       },
-        validatedData,
+      validatedData
     );
     res.status(200).json({
       status: true,
@@ -133,6 +139,7 @@ exports.deleteTrade = async (req, res, next) => {
     const tradeID = req.params.tid;
     const data = await RTrepository.RTdelTrade({
       _id: tradeID,
+      _createdBy:req.user.id
     });
     res.status(200).json({
       status: true,

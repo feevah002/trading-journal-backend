@@ -2,10 +2,11 @@ const mongoose = require("mongoose");
 
 const BTtradesSchema = new mongoose.Schema(
   {
-    // _createdBy:{
-    //   type:mongoose.Schema.Types.ObjectId,
-    //  required:true,
-    // },
+    _createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     session: {
       type: String,
       enum: ["Asian", "New York", "London"],

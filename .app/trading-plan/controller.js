@@ -1,8 +1,7 @@
-const repository = require("./repository");
-const {
-  validateCreatedplan,
-  validateEditedplan,
-} = require("../middleware/validate");
+const { getTplan, updTplan, addTplan, delTplan } = require("./repository");
+const validateInput = require("../../utils/validateInput");
+let { validateCreatedplan, validateEditedplan } = new validateInput();
+const { getUser } = require("../user/repository");
 
 /**
  * @author Ikenna Emmanuel <eikenna58@gmail.com>
@@ -13,7 +12,7 @@ const {
  */
 exports.get = async (req, res, next) => {
   try {
-    const data = await repository.getTplan();
+    const data = await getTplan({ _createdBy: req.user.id });
     res.status(200).json({
       status: true,
       data: data,
@@ -26,7 +25,6 @@ exports.get = async (req, res, next) => {
   }
 };
 
-
 /**
  * @author Ikenna Emmanuel <eikenna58@gmail.com>
  * @description create a new trading plan
@@ -36,8 +34,13 @@ exports.get = async (req, res, next) => {
  */
 exports.create = async (req, res, next) => {
   try {
-    const validatedData = await validateCreatedplan(req.body);
-    const data = await repository.addTplan(validatedData);
+    const validatedData = await validateCreatedplan(req.body, req.user.id);
+    const data = await addTplan(validatedData, req.user.id);
+
+    const user = await getUser({ _id: req.user.id });
+    user.tradePlan = data.id;
+    await user.save();
+
     res.status(200).json({
       status: true,
       data: data,
@@ -59,14 +62,15 @@ exports.create = async (req, res, next) => {
  */
 exports.update = async (req, res, next) => {
   try {
-    const validatedData = await validateEditedplan(req.body);
-    const data = await repository.updTplan(validatedData.plan);
+    const validatedData = await validateEditedplan(req.body, req.user.id);
+    const data = await updTplan({ _createdBy: req.user.id }, validatedData);
+
     res.status(200).json({
       status: true,
       data: data,
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json({
       status: false,
       error,
@@ -82,12 +86,11 @@ exports.update = async (req, res, next) => {
  */
 exports.del = async (req, res, next) => {
   try {
-    const data = await repository.delTplan();
+    const data = await delTplan(req.user.id);
     res.status(200).json({
       status: true,
     });
   } catch (error) {
-    console.log(error)
     res.status(500).json({
       status: false,
       error,

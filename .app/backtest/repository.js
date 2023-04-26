@@ -1,8 +1,8 @@
 const BTtrades = require('./model')
 
 // get all backtest data
-exports.BTtrades = async () => {
-  const data = BTtrades.find({});
+exports.BTtrades = async (query) => {
+  const data = BTtrades.find(query);
   return data;
 };
 
@@ -13,29 +13,34 @@ exports.BTaddTrade = async (payload)=>{
 }
 
 // show trades by session
-exports.BTshowBySession = async (session)=>{
+exports.BTshowBySession = async (session, userId)=>{
   const data = BTtrades.find({
-    session:session
+    session:session,
+    _createdBy: userId
   })
   return data
 }
 
 // show trades by setup
-exports.BTshowBySetup = async (setup)=>{
+exports.BTshowBySetup = async (setup, userId)=>{
   const data = BTtrades.find({
-    setup:setup
-  })
+    setup: setup,
+    _createdBy: userId,
+  });
   return data
 }
 
 // edit a trade
 exports.BTUpdateTrade = async (id, payload) => {
-  const data = BTtrades.findByIdAndUpdate(id, payload);
+  const data = BTtrades.findByIdAndUpdate(query, payload);
   return data;
 };
 
 // delete a trade
-exports.BTdelTrade = async (id) => {
-  const data = BTtrades.findByIdAndRemove(id)
+exports.BTdelTrade = async (id, userId) => {
+  const data = BTtrades.findByIdAndRemove({
+    _id:id,
+    _createdBy:userId
+  })
   return data;
 };

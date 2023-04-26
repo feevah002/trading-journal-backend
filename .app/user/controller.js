@@ -1,10 +1,8 @@
-const repository = require("./repository");
-const ErrorResponse = require("../../utils/errorResponse");
 const sendEmail = require("../../utils/email/sendEmail");
-const bcrypt = require("bcrypt");
 const _ = require("lodash");
 const { signToken } = require("../../utils/signToken");
 const validateInput = require("../../utils/validateInput");
+const validate = new validateInput();
 const mongoose = require("mongoose");
 const { matchPassword } = require("../../utils/matchPassword");
 const {
@@ -16,18 +14,12 @@ const {
   deleteAccount,
   verifyUser,
   updateUserDetails,
-  createCloudUrl,
 } = require("./repository");
 
 // -----------create and verify new account------------------
 exports.signUpController = async (req, res, next) => {
-  let validate = new validateInput();
-  let validatedData = validate.atSignUp(req.body, req.file);
-  // if avatar exist
-  if (validatedData.avatar) {
-    const avatarUrl = await createCloudUrl(validatedData.avatar);
-    validatedData.avatar = avatarUrl;
-  }
+
+  let validatedData = await validate.atSignUp(req.body, req.file);
   // delete later
   const User = require("./user.model");
   await User.findOneAndDelete({ email: validatedData.email });
@@ -144,13 +136,7 @@ exports.getUserProfileController = async (req, res, next) => {
 exports.updateUserProfileController = async (req, res, next) => {
   try {
     // validating data
-    let validate = new validateInput();
-    let validatedData = validate.atEdit(req.body, req.file);
-    // if avatar exist
-    if (validatedData.avatar) {
-      const avatarUrl = await createCloudUrl(validatedData.avatar);
-      validatedData.avatar = avatarUrl;
-    }
+    let validatedData = await validate.atEdit(req.body, req.file);
     const username = req.params.username;
     const exist = await getUser({ username });
     if (!exist) {
@@ -182,7 +168,6 @@ exports.updateUserProfileController = async (req, res, next) => {
  */
 exports.loginController = async (req, res, next) => {
   try {
-    let validate = new validateInput();
     const { email, password } = validate.atLogin(req.body);
     if (!email || !password) {
       return res.status(400).json({

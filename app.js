@@ -21,7 +21,7 @@ const tradeplan = require("./.app/trading-plan/route");
 const userRoute = require("./.app/user/route");
 
 app.use("/trades/real-time", RTtrades);
-app.use("/trades/back-time", BTtrades);
+app.use("/trades/back-test", BTtrades);
 app.use("/trades/strategy", tradingStrategy);
 app.use("/trades/trade-plan", tradeplan);
 app.use("/", userRoute);

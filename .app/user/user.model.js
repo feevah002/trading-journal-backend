@@ -9,8 +9,8 @@ const UserSchema = new mongoose.Schema(
     email: {
       type: String,
       trim: true,
-      // unique: true,
-      //required: true,
+      unique: true,
+      required: true,
     },
     avatar: {
       type: String,
@@ -18,42 +18,48 @@ const UserSchema = new mongoose.Schema(
     username: {
       type: String,
       trim: true,
-      //required: true,
-      // unique: true,
+      required: true,
+      unique: true,
     },
     firstname: {
       type: String,
       trim: true,
-      //required: true,
-      // unique: true,
+      required: true,
     },
     lastname: {
       type: String,
       trim: true,
-      //required: true,
-      // unique: true,
+      required: true,
     },
     middlename: {
       type: String,
       trim: true,
-      //required: true,
-      // unique: true,
     },
     verified: {
       type: Boolean,
       default: false,
     },
+    tradePlan: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "TradePlan",
+    },
+    tradeStrategy: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "TradeStrategy",
+    }],
     trades: {
       realtime: [
         {
           type: mongoose.Schema.Types.ObjectId,
           ref: "RTtrades",
+          required: true,
         },
       ],
       backtest: [
         {
           type: mongoose.Schema.Types.ObjectId,
           ref: "BTtrades",
+          required: true,
         },
       ],
     },

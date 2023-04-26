@@ -1,20 +1,18 @@
-const JWT = require("jsonwebtoken");
 const User = require("./user.model");
 const sendEmail = require("../../utils/email/sendEmail");
-const crypto = require("crypto");
 const bcrypt = require("bcrypt");
-const cloudinary = require("../../config/cloudinary");
 const { matchPassword } = require("../../utils/matchPassword");
 
-const JWTSecret = process.env.JWT_SECRET;
 const bcryptSalt = process.env.BCRYPT_SALT;
 const clientURL = process.env.CLIENT_URL;
 
+// creates a new user
 exports.createNewUser = async (data, options) => {
   const user = await User.create(data, options);
   return user;
 };
 
+// user verification
 exports.verifyUser = async (query, token) => {
   let user = User.findOne(query);
 
@@ -47,30 +45,19 @@ exports.verifyUser = async (query, token) => {
   }
 };
 
+// finding user
 exports.getUser = async (query) => {
   const user = await User.findOne(query);
   return user;
 };
-exports.createCloudUrl = async (filePath) => {
-  const cloudUrl = await cloudinary.uploader
-    .upload(filePath)
-    .then((data) => {
-      return data;
-    })
-    .catch((err) => {
-      return err;
-    });
-  if (!cloudUrl.secure_url) {
-    return false;
-  } else {
-    return cloudUrl.secure_url;
-  }
-};
+
+// update user details
 exports.updateUserDetails = async (query, updData) => {
   const newData = await User.findOneAndUpdate(query, updData);
   return newData;
 };
 
+// sends reset password link to  email
 exports.requestPasswordReset = async (email) => {
   const user = await User.findOne({ email });
   if (!user) {
@@ -97,6 +84,7 @@ exports.requestPasswordReset = async (email) => {
   };
 };
 
+// reset password
 exports.resetPassword = async (userId, resetPasswordToken, password) => {
   let userInfo = await User.findOne({ _id: userId });
   if (!userInfo.resetPasswordToken) {
@@ -141,7 +129,7 @@ exports.resetPassword = async (userId, resetPasswordToken, password) => {
   };
 };
 
-
+// sends delete account link to email
 exports.requestDeleteAccount = async (id, password) => {
   const user = await User.findById(id);
 
@@ -170,9 +158,10 @@ exports.requestDeleteAccount = async (id, password) => {
   };
 };
 
+// deletes account
 exports.deleteAccount = async (userId, deleteAccountToken, password) => {
   let user = await User.findById(userId);
-  if(!user){
+  if (!user) {
     return {
       status: false,
       error: "account already deleted or doesn't exist",
@@ -203,8 +192,6 @@ exports.deleteAccount = async (userId, deleteAccountToken, password) => {
     };
   }
 
-  await User.findByIdAndDelete(userId);
-
   await sendEmail(
     user.email,
     "Account deleted successfully",
@@ -213,6 +200,9 @@ exports.deleteAccount = async (userId, deleteAccountToken, password) => {
     },
     "../../utils/email/templates/deleteAccount.handlebars"
   );
+
+  await User.findByIdAndDelete(userId);
+
   return {
     status: true,
     message: "account deleted successfully",

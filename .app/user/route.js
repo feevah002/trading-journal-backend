@@ -1,3 +1,6 @@
+const router = require("express").Router();
+const { authprotect } = require("../../middleware/auth");
+const { upload } = require("../../config/multer");
 const {
   signUpController,
   loginController,
@@ -10,47 +13,31 @@ const {
   getUserProfileController,
   updateUserProfileController,
 } = require("./controller");
-const { upload } = require("../../config/multer");
-const { protect } = require("../../middleware/auth");
 
-const router = require("express").Router();
 
-// create and verify new account
+// create new account
 router.post("/auth/signup", upload.single("avatar"), signUpController);
+// verify new account
 router.post("/auth/verify/:uid/:token", verifyController);
 
-// login/logout
+// login
 router.post("/auth/login", loginController);
+// logout
 router.post("/auth/logout", logoutController);
 
 //get user profile
-router.get("/auth/user-profile/:username", protect, getUserProfileController);
-
+router.get("/auth/user-profile/:username", authprotect, getUserProfileController);
 // update user profile
-router.post(
-  "/auth/user-profile/:username/",
-  protect,
-  upload.single("avatar"),
-  updateUserProfileController
-);
+router.post("/auth/user-profile/:username/", authprotect, upload.single("avatar"), updateUserProfileController);
 
-// reset password
+// request reset password
 router.post("/auth/requestResetPassword", resetPasswordRequestController);
-router.post(
-  "/auth/resetPassword/:resetPasswordToken/:userId",
-  resetPasswordController
-);
+// reset password
+router.post("/auth/resetPassword/:resetPasswordToken/:userId", resetPasswordController);
 
 // request delete account
-router.post(
-  "/auth/requestDeleteAccount",
-  protect,
-  deleteAccountRequestController
-);
+router.post("/auth/requestDeleteAccount", authprotect, deleteAccountRequestController);
 // delete account
-router.post(
-  "/auth/deleteAccount/:deleteAccountToken/:userId",
-  deleteAccountController
-);
+router.post("/auth/deleteAccount/:deleteAccountToken/:userId", deleteAccountController);
 
 module.exports = router;

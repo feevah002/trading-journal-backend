@@ -8,6 +8,11 @@ const {
   deleteTrade,
   updateTrade,
 } = require("./controller");
+const { authprotect } = require("../../middleware/auth");
+const { checkRTTradesOwnership } = require("../../middleware/permission");
+
+// protect all routes
+router.use(authprotect);
 
 // get all real time trades
 router.get("/", getAllTrades);
@@ -22,9 +27,9 @@ router.get("/session/:session", getBySession);
 router.get("/setup/:setup", getBySetup);
 
 // update a trade
-router.post("/update/:tid", multerInstance.upload.single("media"),  updateTrade);
+router.post("/update/:tid", checkRTTradesOwnership,  multerInstance.upload.single("media"),  updateTrade);
 
 // delete a trade
-router.post("/delete/:tid", deleteTrade);
+router.post("/delete/:tid", checkRTTradesOwnership, deleteTrade);
 
 module.exports = router;

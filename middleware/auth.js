@@ -5,7 +5,7 @@ const User = require("../.app/user/user.model");
 const { getUser } = require("../.app/user/repository");
 
 // Protect routes
-exports.protect = asyncHandler(async (req, res, next) => {
+exports.authprotect = asyncHandler(async (req, res, next) => {
   let token;
 
   if (
@@ -26,7 +26,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
   try {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await getUser({_id: decoded.user_id});
+    req.user = await getUser({ _id: decoded.user_id });
     if (req.user) {
       next();
     } else {
@@ -51,3 +51,4 @@ exports.authorize = (...roles) => {
     next();
   };
 };
+

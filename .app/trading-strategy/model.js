@@ -4,7 +4,8 @@ const TradeStrategySchema = new mongoose.Schema(
   {
     _createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      // required:true,
+      ref: "User",
+      required: true,
     },
     title: {
       type: String,
