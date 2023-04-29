@@ -50,6 +50,7 @@ exports.create = async (req, res, next) => {
       data: data,
     });
   } catch (error) {
+    console.log(error)
     res.status(500).json({
       status: false,
       error,

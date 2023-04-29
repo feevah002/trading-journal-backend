@@ -20,8 +20,11 @@ exports.signToken = (user, statusCode, res) => {
   if (process.env.NODE_ENV === 'production') {
     options.secure = true;
   }
-  
+  let userInfo
+  Array.isArray(user)?userInfo = user[0]:userInfo=user
   res.status(statusCode).cookie("token", token, options).json({
+    token,
+    user:userInfo,
     message: "sign up successful",
     status: true,
   });

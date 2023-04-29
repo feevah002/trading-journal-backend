@@ -71,6 +71,7 @@ exports.signUpController = async (req, res, next) => {
   } catch (error) {
     session.endSession();
     return res.status(500).json({
+
       status: false,
       error: error,
     });
@@ -175,6 +176,7 @@ exports.loginController = async (req, res, next) => {
         error: "Please provide an email and password",
       });
     }
+
     const data = await getUser({ email: email });
 
     if (_.isEmpty(data)) {

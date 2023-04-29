@@ -18,18 +18,18 @@ const UserSchema = new mongoose.Schema(
     username: {
       type: String,
       trim: true,
-      required: true,
+      //required: true,
       unique: true,
     },
     firstname: {
       type: String,
       trim: true,
-      required: true,
+      //required: true,
     },
     lastname: {
       type: String,
       trim: true,
-      required: true,
+      //required: true,
     },
     middlename: {
       type: String,
@@ -38,6 +38,9 @@ const UserSchema = new mongoose.Schema(
     verified: {
       type: Boolean,
       default: false,
+    },
+    phone:{
+      type:Number
     },
     tradePlan: {
       type: mongoose.Schema.Types.ObjectId,
@@ -52,14 +55,14 @@ const UserSchema = new mongoose.Schema(
         {
           type: mongoose.Schema.Types.ObjectId,
           ref: "RTtrades",
-          required: true,
+          //required: true,
         },
       ],
       backtest: [
         {
           type: mongoose.Schema.Types.ObjectId,
           ref: "BTtrades",
-          required: true,
+          //required: true,
         },
       ],
     },

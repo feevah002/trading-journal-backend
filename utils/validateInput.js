@@ -87,6 +87,9 @@ class ValidateInput {
     if (media) {
       validated.media = await createTradeImageUrl(media.path);
     }
+    if(data.position){
+      validated.position = data.position
+    }
     if (data.session) {
       validated.session = data.session;
     }
@@ -114,8 +117,8 @@ class ValidateInput {
     if (data.date) {
       validated.date = data.date;
     }
-    if (data.tradeOutcomenum) {
-      validated.tradeOutcomenum = data.tradeOutcomenum;
+    if (data.tradeOutcome) {
+      validated.tradeOutcome = data.tradeOutcome;
     }
     if (data.profit) {
       validated.profit = data.profit;
@@ -139,7 +142,9 @@ class ValidateInput {
     if (data.session) {
       validated.session = data.session;
     }
-
+      if (data.position) {
+        validated.position = data.position;
+      }
     if (media) {
       validated.media = await createTradeImageUrl(media.path);
     }

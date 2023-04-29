@@ -39,7 +39,6 @@ exports.create = async (req, res, next) => {
      const user = await getUser({ _id: req.user.id });
      user.trades.realtime.push(data.id);
      await user.save();
-   
     res.status(200).json({
       status: true,
       data: data,

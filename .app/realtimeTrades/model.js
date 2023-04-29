@@ -12,9 +12,14 @@ const RTtradesSchema = new mongoose.Schema(
       enum: ["Asian", "New York", "London"],
       required: true,
     },
+    position: {
+      type: String,
+      enum: ["Long", "Short"],
+      required: true,
+    },
     account: {
       type: String,
-      enum: ["demo", "real"],
+      enum: ["Demo", "Real"],
     },
     media: {
       type: String,
@@ -45,7 +50,7 @@ const RTtradesSchema = new mongoose.Schema(
     },
     tradeOutcome: {
       type: String,
-      // required: true,
+      required: true,
       enum: ["Profit", "Loss"],
     },
     profit: {

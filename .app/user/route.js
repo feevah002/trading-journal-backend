@@ -23,7 +23,7 @@ router.post("/auth/verify/:uid/:token", verifyController);
 // login
 router.post("/auth/login", loginController);
 // logout
-router.post("/auth/logout", logoutController);
+router.get("/auth/logout", logoutController);
 
 //get user profile
 router.get("/auth/user-profile/:username", authprotect, getUserProfileController);

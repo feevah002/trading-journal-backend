@@ -7,6 +7,11 @@ const BTtradesSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    position:{
+      type:String,
+      enum:['Long', 'Short'],
+      required:true
+    },
     session: {
       type: String,
       enum: ["Asian", "New York", "London"],
@@ -34,7 +39,7 @@ const BTtradesSchema = new mongoose.Schema(
       type: String,
     },
     time: {
-      type: String,
+      type: Date,
     },
     date: {
       type: String,
