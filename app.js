@@ -7,7 +7,7 @@ require("dotenv").config({ path: "./.env/config.env" });
 const cors = require("cors");
 app.use(
   cors({
-    origin: "http://127.0.0.1:5500",
+    origin: ["http://127.0.0.1:5500", "https://feevah002.github.io"],
   })
 );
 // DB conector
